@@ -1,7 +1,7 @@
 [project]
 name = "file-sorter"
 version = "0.1.0"
-description = "Add your description here"
+description = "Scripts that I use to sort my files"
 readme = "README.md"
 authors = [
     { name = "Paul Ragot", email = "ragot.paul12@gmail.com" }
