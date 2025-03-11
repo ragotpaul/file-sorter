@@ -3,5 +3,15 @@ name = "file-sorter"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
+authors = [
+    { name = "Paul Ragot", email = "ragot.paul12@gmail.com" }
+]
 requires-python = ">=3.13"
 dependencies = []
+
+[project.scripts]
+file-sorter = "file_sorter:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
