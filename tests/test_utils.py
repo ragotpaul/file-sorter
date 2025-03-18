@@ -74,11 +74,11 @@ def test_compute_hashes(temp_dir, compute_hash_with_cmd_func):
             file_path = os.path.join(root, file)
             computed_hash = hash_func(file_path)
             expected_hashes.setdefault(computed_hash, []).append(file_path)
-
-    # Act
     file_paths = []
     for root, _, files in os.walk(temp_dir):
         file_paths.extend(os.path.join(root, file) for file in files)
+
+    # Act
     computed_hashes = compute_hashes(file_paths, hash_algorithm)
 
     # Assert
@@ -97,3 +97,24 @@ def test_compute_hashes_with_existing_hashes(temp_file):
     assert "dummyhash" in result
     assert len(result["dummyhash"]) == 1
     assert result["dummyhash"][0] == str(temp_file)
+
+
+def test_compute_hashes_with_invalid_file(temp_dir, compute_hash_with_cmd_func):
+    # Arrange
+    hash_func, hash_algorithm = compute_hash_with_cmd_func
+    expected_hashes = {}
+    for root, _, files in os.walk(temp_dir):
+        for file in files:
+            file_path = os.path.join(root, file)
+            computed_hash = hash_func(file_path)
+            expected_hashes.setdefault(computed_hash, []).append(file_path)
+    file_paths = []
+    for root, _, files in os.walk(temp_dir):
+        file_paths.extend(os.path.join(root, file) for file in files)
+    file_paths.append("/invalid/path/to/file.txt")
+
+    # Act
+    computed_hashes = compute_hashes(file_paths, hash_algorithm)
+
+    # Assert
+    assert computed_hashes == expected_hashes
