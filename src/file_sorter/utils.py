@@ -45,7 +45,7 @@ def compute_hashes(
     hash_algorithm: str = "sha256",
     buffer_size: int = 4096,
     existing_hashes: Optional[dict[str, list[str]]] = None,
-    quiet: bool = False,
+    progress: bool = False,
 ) -> dict[str, list[str]]:
     """
     Compute the hashes of multiple files.
@@ -54,7 +54,7 @@ def compute_hashes(
     :param hash_algorithm: The hash algorithm type to use.
     :param buffer_size: The buffer size (in bytes) to read from the file.
     :param existing_hashes: A dictionary containing pre-computed hashes and their corresponding paths.
-    :param quiet: If True, suppress progress display.
+    :param progress: If True, display progress bar while computing hashes.
     :return: A dictionary containing the computed hashes and their corresponding paths.
     """
     if existing_hashes is None:
@@ -68,9 +68,9 @@ def compute_hashes(
 
     computed_hashes = {}
     iterable = (
-        file_paths
-        if quiet
-        else track(file_paths, description="Computing hashes of files")
+        track(file_paths, description="Computing hashes of files")
+        if progress
+        else file_paths
     )
     for file_path in iterable:
         abs_path = os.path.abspath(file_path)

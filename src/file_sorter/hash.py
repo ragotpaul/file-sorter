@@ -45,13 +45,13 @@ from .utils import compute_hashes
     help="Set the buffer size (in bytes) to read from the file.",
 )
 @click.option(
-    "--quiet",
-    "-q",
+    "--progress",
+    "-p",
     is_flag=True,
-    help="Suppress progress display.",
+    help="Display progress while computing hashes.",
 )
 def cli_hash(
-    paths, input_json_files, output_json_file, hash_algorithm, buffer_size, quiet
+    paths, input_json_files, output_json_file, hash_algorithm, buffer_size, progress
 ):
     """
     Compute the hash of files.
@@ -79,7 +79,7 @@ def cli_hash(
         hash_algorithm=hash_algorithm,
         buffer_size=buffer_size,
         existing_hashes=existing_hashes,
-        quiet=quiet,
+        progress=progress,
     )
 
     if output_json_file:

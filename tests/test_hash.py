@@ -21,7 +21,6 @@ def test_cli_hash(temp_file, compute_hash_with_cmd_func):
             temp_file,
             "--hash-algorithm",
             hash_algorithm,
-            "--quiet",
         ],
     )
 
@@ -78,7 +77,6 @@ def test_cli_hash_directory(temp_dir, compute_hash_with_cmd_func):
             temp_dir,
             "--hash-algorithm",
             hash_algorithm,
-            "--quiet",
         ],
     )
 
