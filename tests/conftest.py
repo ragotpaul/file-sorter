@@ -7,15 +7,9 @@ import pytest
 
 @pytest.fixture(params=[1, 64, 1024, 4096, 8192])
 def temp_file(request):
-    temp_file_path = None
-    try:
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(os.urandom(request.param))
-            temp_file_path = temp_file.name
-        yield temp_file_path
-    finally:
-        if temp_file_path and os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
+    with tempfile.NamedTemporaryFile() as temp_file:
+        temp_file.write(os.urandom(request.param))
+        yield temp_file.name
 
 
 @pytest.fixture(
@@ -33,25 +27,20 @@ def temp_file(request):
     ]
 )
 def temp_dir(request):
-    temp_dir_path = None
-    try:
-        with tempfile.TemporaryDirectory(delete=False) as temp_dir:
-            structure = request.param
-            for path, files in structure.items():
-                dir_path = os.path.join(temp_dir, path)
-                os.makedirs(dir_path, exist_ok=True)
-                for file_name, file_size in files:
-                    file_path = os.path.join(dir_path, file_name)
-                    with open(file_path, "wb") as f:
-                        f.write(os.urandom(file_size))
-            temp_dir_path = temp_dir
-        yield temp_dir_path
-    finally:
-        if temp_dir and os.path.exists(temp_dir):
-            for root, _, files in os.walk(temp_dir, topdown=False):
-                for file in files:
-                    os.remove(os.path.join(root, file))
-                os.rmdir(root)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        structure = request.param
+        for path, files in structure.items():
+            dir_path = os.path.join(temp_dir, path)
+            os.makedirs(dir_path, exist_ok=True)
+            for file_name, file_size in files:
+                file_path = os.path.join(dir_path, file_name)
+                with open(file_path, "wb") as f:
+                    f.write(os.urandom(file_size))
+        yield temp_dir
+        for root, _, files in os.walk(temp_dir, topdown=False):
+            for file in files:
+                os.remove(os.path.join(root, file))
+            os.rmdir(root)
 
 
 @pytest.fixture(
@@ -75,14 +64,8 @@ def compute_hash_with_cmd_func(request):
 
 @pytest.fixture
 def json_file():
-    temp_file_path = None
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp_file:
-            temp_file_path = temp_file.name
-        yield temp_file_path
-    finally:
-        if temp_file_path and os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
+    with tempfile.NamedTemporaryFile(suffix=".json") as temp_file:
+        yield temp_file.name
 
 
 @pytest.fixture
