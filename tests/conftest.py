@@ -74,12 +74,22 @@ def compute_hash_with_cmd_func(request):
 
 
 @pytest.fixture
-def output_json_file():
-    output_json_file_path = None
+def json_file():
+    temp_file_path = None
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp_file:
-            output_json_file_path = temp_file.name
-        yield output_json_file_path
+            temp_file_path = temp_file.name
+        yield temp_file_path
     finally:
-        if output_json_file_path and os.path.exists(output_json_file_path):
-            os.remove(output_json_file_path)
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+
+
+@pytest.fixture
+def output_json_file(json_file):
+    return json_file
+
+
+@pytest.fixture
+def input_json_file(json_file):
+    return json_file

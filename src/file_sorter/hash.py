@@ -70,8 +70,8 @@ def cli_hash(
         elif os.path.isfile(path):
             file_paths.append(path)
         else:
-            click.echo(
-                f"Error: {path} is not a valid file or directory path.", err=True
+            raise click.ClickException(
+                f"Error: {path} is not a valid file or directory path."
             )
 
     computed_hashes = compute_hashes(
