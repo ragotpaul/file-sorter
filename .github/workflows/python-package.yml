@@ -5,13 +5,15 @@ on:
     branches:
       - develop
       - master
+    tags:
+      - "v*.*.*"
   pull_request:
     branches:
       - develop
       - master
 
 jobs:
-  build:
+  tests:
 
     runs-on: ubuntu-latest
     strategy:
@@ -20,31 +22,69 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout the repository
+      uses: actions/checkout@v4
 
-    - name: Install the latest version of uv and setup Python ${{ matrix.python-version }}
+    - name: Install uv and setup Python ${{ matrix.python-version }}
       uses: astral-sh/setup-uv@v5
       with:
         enable-cache: true
         cache-dependency-glob: |
           **/requirements*.txt
-          **/uv.lock
           **/pyproject.toml
         python-version: ${{ matrix.python-version }}
 
     - name: Test with pytest and generate coverage report
       run: |
-        uv run --frozen pytest --cov=src --cov-branch --cov-report=xml --cov-report=html:htmlcov tests
+        uv run --frozen \
+          pytest \
+            --cov=src \
+            --cov-branch \
+            --cov-report=xml \
+            --cov-report=html:htmlcov \
+            tests
 
     - name: Upload coverage reports to Codecov
-      if: ${{ !env.ACT }}
+      if: ${{ !github.event.act }}
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: ${{ github.repository }}
 
-    - name: Build distribution packages
-      run: uv build --sdist --wheel
-
     - name: Minimize uv cache
       run: uv cache prune --ci
+
+
+  release:
+
+    runs-on: ubuntu-latest
+    needs: tests
+    if: ${{ (github.event_name == 'push') && (github.ref_type == 'tag') }}
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+
+    - name: Install uv and setup Python
+      uses: astral-sh/setup-uv@v5
+
+    - name: Build the Python distribution
+      run: uv build --out-dir dist --sdist --wheel
+
+    - name: Check if the version number is valid
+      run: |
+        pyproject_version=$(uvx --from toml-cli \
+          toml get --toml-path pyproject.toml project.version)
+        tag_version=$(echo ${{ github.ref }} | sed 's/^refs\/tags\/v//')
+        if [ "$pyproject_version" != "$tag_version" ]; then
+          echo "::error file=pyproject.toml::The version number in pyproject.toml ($pyproject_version) does not match the git tag ($tag_version)"
+          exit 1
+        fi
+
+    - name: Release the Python distribution
+      if: ${{ !github.event.act }}
+      uses: softprops/action-gh-release@v2
+      with:
+        files: dist/*
