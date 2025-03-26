@@ -80,7 +80,7 @@ jobs:
           toml get --toml-path pyproject.toml project.version)
         tag_version=$(echo ${{ github.ref }} | sed 's/^refs\/tags\/v//')
         if [ "$pyproject_version" != "$tag_version" ]; then
-          echo "The version number in pyproject.toml ($pyproject_version) does not match the tag ($tag_version)"
+          echo "::error file=pyproject.toml::The version number in pyproject.toml ($pyproject_version) does not match the git tag ($tag_version)"
           exit 1
         fi
 
