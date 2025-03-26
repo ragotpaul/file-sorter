@@ -1,0 +1,31 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Get the default Python version
+      id: python-version
+      run: echo "PYTHON_VERSION=$(cat .python-version)" >> $GITHUB_ENV
+
+    - name: Download distributions
+      if: ${{ !env.ACT }}
+      uses: actions/download-artifact@v4
+      with:
+        name: dist-python-${{ env.PYTHON_VERSION }}
+
+    - name: Release
+      if: ${{ !env.ACT }}
+      uses: softprops/action-gh-release@v2
+      with:
+        files: dist/*
