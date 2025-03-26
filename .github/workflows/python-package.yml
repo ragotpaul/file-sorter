@@ -74,6 +74,16 @@ jobs:
     - name: Build the distribution
       run: uv build --out-dir dist --sdist --wheel
 
+    - name: Check if the version number is valid
+      run: |
+        pyproject_version=$(uvx --from toml-cli \
+          toml get pyproject.toml project.version)
+        tag_version=$(echo ${{ github.ref }} | sed 's/^refs\/tags\/v//')
+        if [ "$pyproject_version" != "$tag_version" ]; then
+          echo "The version number in pyproject.toml ($pyproject_version) does not match the tag ($tag_version)"
+          exit 1
+        fi
+
     - name: Release the distribution
       if: ${{ !env.ACT }}
       uses: softprops/action-gh-release@v2
