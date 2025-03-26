@@ -77,7 +77,7 @@ jobs:
     - name: Check if the version number is valid
       run: |
         pyproject_version=$(uvx --from toml-cli \
-          toml get pyproject.toml project.version)
+          toml get --toml-path pyproject.toml project.version)
         tag_version=$(echo ${{ github.ref }} | sed 's/^refs\/tags\/v//')
         if [ "$pyproject_version" != "$tag_version" ]; then
           echo "The version number in pyproject.toml ($pyproject_version) does not match the tag ($tag_version)"
